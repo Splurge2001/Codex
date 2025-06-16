@@ -11,7 +11,11 @@ class PointCloudDataset(Dataset):
         self.transform = transform
         self.samples = []
         self.class_to_idx = {}
-
+        
+        if class_names is None:
+            # automatically collect folder names that are actual directories
+            class_names = [d for d in sorted(os.listdir(root_dir))
+                           if os.path.isdir(os.path.join(root_dir, d))]
         for label, class_name in enumerate(sorted(os.listdir(root_dir))):
             class_dir = os.path.join(root_dir, class_name)
             if not os.path.isdir(class_dir):
@@ -29,6 +33,7 @@ class PointCloudDataset(Dataset):
     def __getitem__(self, idx):
         file_path, label = self.samples[idx]
         data = np.loadtxt(file_path).astype(np.float32)
+        # normalise each file to [0, 1] range if possible
         if data.max() > data.min():
             data = (data - data.min()) / (data.max() - data.min())
         tensor = torch.from_numpy(data).unsqueeze(0)

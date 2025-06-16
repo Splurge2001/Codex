@@ -15,7 +15,11 @@ train_transformer = transforms.Compose([
     transforms.Normalize((0.5,), (0.5,))
 ])
 
-full_dataset = PointCloudDataset("dataset", transform=train_transformer)
+# dataset may live directly under the dataset folder or in a nested "data" folder
+data_root = os.path.join("dataset", "data") if os.path.isdir(os.path.join("dataset", "data")) else "dataset"
+# use explicit class order expected by the project
+class_order = ["chatter", "stable", "force"]
+full_dataset = PointCloudDataset(data_root, transform=train_transformer, class_names=class_order)
 train_size = int(0.8 * len(full_dataset))
 test_size = len(full_dataset) - train_size
 trainset, testset = random_split(full_dataset, [train_size, test_size], generator=torch.Generator().manual_seed(42))
@@ -72,7 +76,9 @@ if __name__ =="__main__":
     epoch_num = 10
     learning_rate = 0.001
     num_class = 3
-    save_path = r"model_path\best.pth"
+    save_dir = os.path.join("model_path")
+    os.makedirs(save_dir, exist_ok=True)
+    save_path = os.path.join(save_dir, "best.pth")
     model = sampleCNN(num_class).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
