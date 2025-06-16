@@ -6,18 +6,17 @@ from torch.utils.data import Dataset
 class PointCloudDataset(Dataset):
     """Dataset for point cloud txt files organised in class folders."""
 
-    def __init__(self, root_dir, transform=None, class_names=None):
+    def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
         self.transform = transform
         self.samples = []
         self.class_to_idx = {}
-
+        
         if class_names is None:
             # automatically collect folder names that are actual directories
             class_names = [d for d in sorted(os.listdir(root_dir))
                            if os.path.isdir(os.path.join(root_dir, d))]
-
-        for label, class_name in enumerate(class_names):
+        for label, class_name in enumerate(sorted(os.listdir(root_dir))):
             class_dir = os.path.join(root_dir, class_name)
             if not os.path.isdir(class_dir):
                 continue
